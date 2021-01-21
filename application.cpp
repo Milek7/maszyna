@@ -69,7 +69,9 @@ void focus_callback( GLFWwindow *window, int focus ) {
 void window_resize_callback( GLFWwindow *window, int w, int h ) {
     // NOTE: we have two variables which basically do the same thing as we don't have dynamic fullscreen toggle
     // TBD, TODO: merge them?
+#if GLFW_VERSION_MAJOR > 3 || (GLFW_VERSION_MAJOR == 3 && GLFW_VERSION_MINOR >= 3)
     glfwGetWindowContentScale(window, &Global.fWindowXScale, &Global.fWindowYScale);
+#endif
     Global.iWindowWidth = w;
 	Global.iWindowHeight = h;
     glViewport( 0, 0, w, h );
