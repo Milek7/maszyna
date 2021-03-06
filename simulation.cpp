@@ -376,7 +376,9 @@ void state_manager::process_commands() {
 				vehicle->MoverParameters->DistCounter = 0.0;
 				vehicle->MoverParameters->WheelFlat = 0.0;
 				vehicle->MoverParameters->AlarmChainFlag = false;
-				vehicle->MoverParameters->OffsetTrackH = 0.0;
+				if (vehicle->MyTrack->iCategoryFlag & 1) { // reset horizontal offset only for rail
+					vehicle->MoverParameters->OffsetTrackH = 0.0;
+				}
 				vehicle->MoverParameters->OffsetTrackV = 0.0;
 
 				// pantographs

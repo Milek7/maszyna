@@ -817,6 +817,24 @@ debug_panel::update_section_vehicle( std::vector<text_line> &Output ) {
         std::snprintf(m_buffer.data(), m_buffer.size(), STR_C("Electricity usage:\n drawn:    %.1f kWh\n returned: %.1f kWh\n balance:  %.1f kWh"),
                       mover.EnergyMeter.first, -mover.EnergyMeter.second, mover.EnergyMeter.first + mover.EnergyMeter.second);
         Output.emplace_back( m_buffer.data(), Global.UITextColor );
+		TAnimPant *p; // wskaźnik do obiektu danych pantografu
+		for (int i = 0; i < vehicle.iAnimType[ANIM_PANTS]; ++i)
+		{ // pętla po wszystkich pantografach
+			p = vehicle.pants[i].fParamPants;
+			if (p && p->hvPowerWire && DebugTractionFlag)
+			{
+				std::snprintf(
+					m_buffer.data(), m_buffer.size(),
+					STR_C("Pant %d: wire pos1 [%.2f,%.2f,%.2f], stations: %s, %s"),
+					i,
+					p->hvPowerWire->pPoint1[0],
+					p->hvPowerWire->pPoint1[1],
+					p->hvPowerWire->pPoint1[2],
+					p->hvPowerWire->psPower[0] ? p->hvPowerWire->psPower[0]->name() : "none",
+					p->hvPowerWire->psPower[1] ? p->hvPowerWire->psPower[1]->name() : "none");
+				Output.emplace_back(m_buffer.data(), Global.UITextColor);
+			}
+		}
     }
 
 	if (!std::isnan(last_time)) {
