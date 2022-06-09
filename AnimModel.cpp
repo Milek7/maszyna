@@ -659,8 +659,9 @@ TAnimModel::export_as_text_( std::ostream &Output ) const {
     Output
         << location().x << ' '
         << location().y << ' '
-        << location().z << ' '
-        << vAngle.y << ' ';
+        << location().z << ' ';
+    Output
+       << "0 " ;
     // 3d shape
     auto modelfile { (
         pModel ?

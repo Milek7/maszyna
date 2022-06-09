@@ -28,7 +28,7 @@ float CSkyDome::m_distributionycomp[ 5 ][ 2 ] = {
 		{ -0.09495f ,  0.00921f },
 		{ -0.00792f ,  0.21023f },
 		{ -0.04405f , -1.65369f },
-		{ -0.01092f ,  0.05291f }	
+		{ -0.01092f ,  0.05291f }		
 	};
 
 float CSkyDome::m_zenithxmatrix[ 3 ][ 4 ] = {
@@ -223,7 +223,7 @@ void CSkyDome::RebuildColors() {
 
 		// warning : major hack!!! .. i had to do something with values under horizon
 		//vertex.y = Clamp<float>( vertex.y, 0.05f, 1.0f );
-		if ( vertex.y < 0.05f ) vertex.y = 0.05f;
+		if ( vertex.y < 0.05f ) vertex.y = 0.075f;
 
 //		from paper:
 //			const float theta = arccos( vertex.y );
@@ -302,14 +302,14 @@ void CSkyDome::RebuildColors() {
         color = glm::pow( color, gammacorrection );
         m_colours[ i ] = color;
         averagecolor += color;
-        if( ( m_vertices.size() - i ) <= ( m_tesselation * 3 + 3 ) ) {
+        if( ( m_vertices.size() - i ) <= ( m_tesselation * 10 + 10 ) ) {
             // calculate horizon colour from the bottom band of tris
             averagehorizoncolor += color;
         }
 	}
 
     m_averagecolour = glm::max( glm::vec3(), averagecolor / static_cast<float>( m_vertices.size() ) );
-    m_averagehorizoncolour = glm::max( glm::vec3(), averagehorizoncolor / static_cast<float>( m_tesselation * 3 + 3 ) );
+    m_averagehorizoncolour = glm::max( glm::vec3(), averagehorizoncolor / static_cast<float>( m_tesselation * 10 + 10 ) );
 
     m_dirty = true;
 }

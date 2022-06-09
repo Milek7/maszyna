@@ -30,6 +30,7 @@ struct global_settings {
     bool shiftState{ false }; //m7todo: brzydko
     bool ctrlState{ false };
     bool altState{ false };
+	bool capsState{false};
     std::mt19937 random_engine;
     std::mt19937 local_random_engine;
     bool ready_to_load{ false };

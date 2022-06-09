@@ -139,10 +139,10 @@ world_environment::update() {
         keylightintensity = sunlightlevel;
         m_lightintensity = 1.0f;
         // include 'golden hour' effect in twilight lighting
-        float const duskfactor = 1.0f - clamp( Global.SunAngle, 0.0f, 18.0f ) / 18.0f;
+        float const duskfactor = 1.25f - clamp( Global.SunAngle, 0.0f, 18.0f ) / 18.0f;
         keylightcolor = interpolate(
             glm::vec3( 255.0f / 255.0f, 242.0f / 255.0f, 231.0f / 255.0f ),
-            glm::vec3( 235.0f / 255.0f, 140.0f / 255.0f, 36.0f / 255.0f ),
+            glm::vec3( 235.0f / 255.0f, 120.0f / 255.0f, 36.0f / 255.0f ),
             duskfactor );
     }
     // ...retrieve current sky colour and brightness...
@@ -174,9 +174,8 @@ world_environment::update() {
 
     // update the fog. setting it to match the average colour of the sky dome is cheap
     // but quite effective way to make the distant items blend with background better
-    Global.FogColor =
-        interpolate( m_skydome.GetAverageColor(), m_skydome.GetAverageHorizonColor(), 0.25f )
-        * clamp<float>( Global.fLuminance, 0.25f, 1.f );
+    Global.FogColor = (m_skydome.GetAverageHorizonColor() * keylightcolor)
+        * clamp<float>( Global.fLuminance, 0.25f, 1.f ) ;
 
     // weather-related simulation factors
     Global.FrictionWeatherFactor = (

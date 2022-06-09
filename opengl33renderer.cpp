@@ -1774,7 +1774,7 @@ bool opengl33_renderer::Render(world_environment *Environment)
 	// drawn with 500m radius to blend in if the fog range is low
 	glPushMatrix();
     {
-        glScalef( 500.0f, 500.0f, 500.0f );
+        glScalef( 3000.0f, 3000.0f, 3000.0f );
         model_ubs.set_modelview( OpenGLMatrices.data( GL_MODELVIEW ) );
         model_ubo->update( model_ubs );
 
