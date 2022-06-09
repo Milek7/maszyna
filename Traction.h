@@ -20,273 +20,83 @@ class TTractionPowerSource;
 
 class TTraction : public scene::basic_node
 {
-
-	friend opengl_renderer;
-	friend opengl33_renderer;
+    friend opengl_renderer;
+    friend opengl33_renderer;
 
   public: // na razie
-	TTractionPowerSource *psPower[2]{nullptr, nullptr}; // najbliższe zasilacze z obu kierunków
-	TTractionPowerSource *psPowered{nullptr}; // ustawione tylko dla bezpośrednio zasilanego przęsła
-	TTraction *hvNext[2]{nullptr, nullptr}; //łączenie drutów w sieć
-	int iNext[2]{0, 0}; // do którego końca się łączy
-	int iLast{0}; //że niby ostatni drut // ustawiony bit 0, jeśli jest ostatnim drutem w sekcji; bit1 - przedostatni
+    TTractionPowerSource *psPower[ 2 ] { nullptr, nullptr }; // najbliższe zasilacze z obu kierunków
+    TTractionPowerSource *psPowered { nullptr }; // ustawione tylko dla bezpośrednio zasilanego przęsła
+    TTraction *hvNext[ 2 ] { nullptr, nullptr }; //łączenie drutów w sieć
+    int iNext[ 2 ] { 0, 0 }; // do którego końca się łączy
+    int iLast { 0 }; //że niby ostatni drut // ustawiony bit 0, jeśli jest ostatnim drutem w sekcji; bit1 - przedostatni
   public:
-	glm::dvec3 pPoint1, pPoint2, pPoint3, pPoint4;
-	glm::dvec3 vParametric; // współczynniki równania parametrycznego odcinka
-	double fHeightDifference{0.0};
-	int iNumSections{0};
-	int t_iNumSections{0};
-	float NominalVoltage{0.0f};
-	float MaxCurrent{0.0f};
-	float fResistivity{0.0f}; //[om/m], przeliczone z [om/km]
-	DWORD Material{0}; // 1: Cu, 2: Al
-	float WireThickness{0.0f};
-	DWORD DamageFlag{0}; // 1: zasniedziale, 128: zerwana
-	int Wires{2};
-	float WireOffset{0.0f};
-	std::string asPowerSupplyName; // McZapkie: nazwa podstacji trakcyjnej
-	TTractionPowerSource *psSection{nullptr}; // zasilacz (opcjonalnie może to być pulpit sterujący EL2 w hali!)
-	std::string asParallel; // nazwa przęsła, z którym może być bieżnia wspólna
-	std::string t_type; // typ sieci trakcyjnej
-	std::string t_type1; // typ sieci trakcyjnej z całą ścieżką dostępu do pliku
-	TTraction *hvParallel{nullptr}; // jednokierunkowa i zapętlona lista przęseł ewentualnej bieżni wspólnej
-	float fResistance[2]{-1.0f, -1.0f}; // rezystancja zastępcza do punktu zasilania (0: przęsło zasilane, <0: do policzenia)
-	int iTries{1}; // 0 is used later down the road to mark directly powered pieces
-	int PowerState{0}; // type of incoming power, if any
-	// visualization data
-	glm::dvec3 m_origin;
-	gfx::geometry_handle m_geometry;
+    glm::dvec3 pPoint1, pPoint2, pPoint3, pPoint4;
+    glm::dvec3 vParametric; // współczynniki równania parametrycznego odcinka
+    double fHeightDifference { 0.0 };
+    int iNumSections { 0 };
+    float NominalVoltage { 0.0f };
+    float MaxCurrent { 0.0f };
+    float fResistivity { 0.0f }; //[om/m], przeliczone z [om/km]
+    unsigned int Material { 0 }; // 1: Cu, 2: Al
+    float WireThickness { 0.0f };
+    unsigned int DamageFlag { 0 }; // 1: zasniedziale, 128: zerwana
+    int Wires { 2 };
+    float WireOffset { 0.0f };
+    std::string asPowerSupplyName; // McZapkie: nazwa podstacji trakcyjnej
+    TTractionPowerSource *psSection { nullptr }; // zasilacz (opcjonalnie może to być pulpit sterujący EL2 w hali!)
+    std::string asParallel; // nazwa przęsła, z którym może być bieżnia wspólna
+    TTraction *hvParallel { nullptr }; // jednokierunkowa i zapętlona lista przęseł ewentualnej bieżni wspólnej
+    float fResistance[ 2 ] { -1.0f, -1.0f }; // rezystancja zastępcza do punktu zasilania (0: przęsło zasilane, <0: do policzenia)
+    int iTries { 1 }; // 0 is used later down the road to mark directly powered pieces
+    int PowerState { 0 }; // type of incoming power, if any
+    // visualization data
+    glm::dvec3 m_origin;
+    gfx::geometry_handle m_geometry;
 
-	float t_traction_code;
-	float t_contact_wire_num;
-	float t_contact_wire_thick;
-	float t_catenary_wire_num;
-	float t_catenary_wire_thick;
-	bool t_y_overhangs;
-	float t_y_overhangs_lenght;
-	float t_y_overhangs_segments;
-	float t_y_overhangs_thick;
-	float t_height;
+    explicit TTraction( scene::node_data const &Nodedata );
 
-	int t_range{0};
-	int t_range1{0};
-	float t_hange_dist[52][20];
-	float t_hange_num[52];
+    void Load( cParser *parser, glm::dvec3 const &pOrigin );
+    // set origin point
+    void
+        origin( glm::dvec3 Origin ) {
+            m_origin = Origin; }
+    // retrieves list of the track's end points
+    std::vector<glm::dvec3>
+        endpoints() const;
+    // creates geometry data in specified geometry bank. returns: number of created elements, or NULL
+    // NOTE: deleting nodes doesn't currently release geometry data owned by the node. TODO: implement erasing individual geometry chunks and banks
+    std::size_t create_geometry( gfx::geometrybank_handle const &Bank );
+    int TestPoint(glm::dvec3 const &Point);
+    void Connect(int my, TTraction *with, int to);
+    void Init();
+    bool WhereIs();
+    void ResistanceCalc(int d = -1, double r = 0, TTractionPowerSource *ps = nullptr);
+    void PowerSet(TTractionPowerSource *ps);
+    double VoltageGet(double u, double i);
 
-	float t_hange_dist_1[52][20] = {
-	    {2.0, 4.0, 4.0, 4.0, 4.0, 4.0, 2.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {2.0, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 2.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {2.0, 3.5, 3.5, 4.0, 4.0, 3.5, 3.5, 2.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {2.0, 3.5, 4.0, 4.0, 4.0, 4.0, 3.5, 2.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {2.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 2.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {2.0, 3.5, 3.5, 3.5, 4.0, 3.5, 3.5, 3.5, 2.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {2.0, 3.5, 3.5, 4.0, 4.0, 4.0, 3.5, 3.5, 2.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {2.0, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 2.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {2.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 2.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {2.0, 3.5, 3.5, 3.5, 4.0, 4.0, 3.5, 3.5, 3.5, 2.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {2.0, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 2.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {2.0, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 2.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {2.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 2.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {2.0, 3.5, 3.5, 3.5, 4.0, 4.0, 4.0, 3.5, 3.5, 3.5, 2.0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {2.0, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 2.0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {2.0, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 2.0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {2.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 2.0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {2.0, 3.5, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 3.5, 2.0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {2.0, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 2.0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {2.0, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 2.0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {2.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 2.0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {2.0, 3.5, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 3.5, 2.0, 0, 0, 0, 0, 0, 0, 0},
-	    {2.0, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 2.0, 0, 0, 0, 0, 0, 0, 0},
-	    {2.0, 3.5, 3.5, 3.5, 3.5, 3.5, 4.0, 4.0, 3.5, 3.5, 3.5, 3.5, 3.5, 2.0, 0, 0, 0, 0, 0, 0},
-	    {2.0, 3.5, 3.5, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 3.5, 3.5, 2.0, 0, 0, 0, 0, 0, 0},
-	    {2.0, 3.5, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 3.5, 2.0, 0, 0, 0, 0, 0, 0},
-	    {2.0, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 2.0, 0, 0, 0, 0, 0, 0},
-	    {2.0, 3.5, 3.5, 3.5, 3.5, 3.5, 4.0, 4.0, 4.0, 3.5, 3.5, 3.5, 3.5, 3.5, 2.0, 0, 0, 0, 0, 0},
-	    {2.0, 3.5, 3.5, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 3.5, 3.5, 2.0, 0, 0, 0, 0, 0},
-	    {2.0, 3.5, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 3.5, 2.0, 0, 0, 0, 0, 0},
-	    {2.0, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 2.0, 0, 0, 0, 0, 0},
-	    {2.0, 3.5, 3.5, 3.5, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 3.5, 3.5, 3.5, 2.0, 0, 0, 0, 0},
-	    {2.0, 3.5, 3.5, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 3.5, 3.5, 2.0, 0, 0, 0, 0},
-	    {2.0, 3.5, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 3.5, 2.0, 0, 0, 0, 0},
-	    {2.0, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 2.0, 0, 0, 0, 0},
-	    {2.0, 3.5, 3.5, 3.5, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 3.5, 3.5, 3.5, 2.0, 0, 0, 0},
-	    {2.0, 3.5, 3.5, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 3.5, 3.5, 2.0, 0, 0, 0},
-	    {2.0, 3.5, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 3.5, 2.0, 0, 0, 0},
-	    {2.0, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 2.0, 0, 0, 0},
-	    {2.0, 3.5, 3.5, 3.5, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 3.5, 3.5, 3.5, 2.0, 0, 0},
-	    {2.0, 3.5, 3.5, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 3.5, 3.5, 2.0, 0, 0},
-	    {2.0, 3.5, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 3.5, 2.0, 0, 0},
-	    {2.0, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 2.0, 0, 0},
-	    {2.0, 3.5, 3.5, 3.5, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 3.5, 3.5, 3.5, 2.0, 0},
-	    {2.0, 3.5, 3.5, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 3.5, 3.5, 2.0, 0},
-	    {2.0, 3.5, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 3.5, 2.0, 0},
-	    {2.0, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 2.0, 0},
-	    {2.0, 3.5, 3.5, 3.5, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 3.5, 3.5, 3.5, 2.0},
-	    {2.0, 3.5, 3.5, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 3.5, 3.5, 2.0},
-	    {2.0, 3.5, 3.5, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 3.5, 3.5, 2.0},
-	    {2.0, 3.5, 3.5, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 3.5, 3.5, 2.0},
-	};
+private:
+// methods
+    glm::vec3 wire_color() const;
+    // radius() subclass details, calculates node's bounding radius
+    float radius_();
+    // serialize() subclass details, sends content of the subclass to provided stream
+    void serialize_( std::ostream &Output ) const;
+    // deserialize() subclass details, restores content of the subclass from provided stream
+    void deserialize_( std::istream &Input );
+    // export() subclass details, sends basic content of the class in legacy (text) format to provided stream
+    void export_as_text_( std::ostream &Output ) const;
 
-	float t_hange_num_1[52] = {6,  7,  7,  7,  7,  8,  8,  8,  8,  9,  9,  9,  9,  10, 10, 10, 10, 11, 11, 11, 11, 12, 12, 13, 13, 13,
-	                           13, 14, 14, 14, 14, 15, 15, 15, 15, 16, 16, 16, 16, 17, 17, 17, 17, 18, 18, 18, 18, 19, 19, 19, 19, 19};
-
-	float t_hange_dist_5[52][20] = {
-	    {4.0, 8.0, 8.0, 4.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {3.5, 9.0, 9.0, 3.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {4.0, 9.0, 9.0, 4.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {3.0, 7.0, 7.0, 7.0, 3.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {3.5, 7.0, 7.0, 7.0, 3.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {3.5, 7.0, 8.0, 7.0, 3.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {4.0, 7.0, 8.0, 7.0, 4.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {4.0, 7.0, 8.0, 7.0, 4.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {3.5, 8.0, 8.0, 8.0, 3.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {3.5, 8.0, 9.0, 8.0, 3.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {4.0, 8.0, 9.0, 8.0, 4.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {3.5, 9.0, 9.0, 9.0, 3.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {4.0, 9.0, 9.0, 9.0, 4.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {4.0, 7.0, 7.0, 7.0, 7.0, 4.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {3.5, 7.0, 8.0, 8.0, 7.0, 3.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {4.0, 7.0, 8.0, 8.0, 7.0, 4.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {3.5, 8.0, 8.0, 8.0, 8.0, 3.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {4.0, 8.0, 8.0, 8.0, 8.0, 4.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {3.5, 8.0, 9.0, 9.0, 8.0, 3.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {4.0, 8.0, 9.0, 9.0, 8.0, 4.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {3.5, 9.0, 9.0, 9.0, 9.0, 3.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {4.0, 9.0, 9.0, 9.0, 9.0, 4.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {3.5, 7.0, 8.0, 8.0, 8.0, 7.0, 3.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {3.5, 7.0, 8.0, 9.0, 8.0, 7.0, 3.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {4.0, 7.0, 8.0, 9.0, 8.0, 7.0, 4.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {3.5, 8.0, 8.0, 9.0, 8.0, 8.0, 3.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {4.0, 8.0, 8.0, 9.0, 8.0, 8.0, 4.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {3.5, 8.0, 9.0, 9.0, 9.0, 8.0, 3.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {4.0, 8.0, 9.0, 9.0, 9.0, 8.0, 4.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {3.5, 9.0, 9.0, 9.0, 9.0, 9.0, 3.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {4.0, 9.0, 9.0, 9.0, 9.0, 9.0, 4.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {4.0, 7.0, 8.0, 8.0, 8.0, 8.0, 7.0, 4.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {3.5, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 3.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {4.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 4.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {3.5, 8.0, 8.0, 9.0, 9.0, 8.0, 8.0, 3.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {4.0, 8.0, 8.0, 9.0, 9.0, 8.0, 8.0, 4.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {3.5, 8.0, 9.0, 9.0, 9.0, 9.0, 8.0, 3.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {4.0, 8.0, 9.0, 9.0, 9.0, 9.0, 8.0, 4.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {3.5, 9.0, 9.0, 9.0, 9.0, 9.0, 9.0, 3.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {4.0, 9.0, 9.0, 9.0, 9.0, 9.0, 9.0, 4.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {3.5, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 3.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {3.5, 8.0, 8.0, 8.0, 9.0, 8.0, 8.0, 8.0, 3.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {4.0, 8.0, 8.0, 8.0, 9.0, 8.0, 8.0, 8.0, 4.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {3.5, 8.0, 8.0, 9.0, 9.0, 9.0, 8.0, 8.0, 3.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {4.0, 8.0, 8.0, 9.0, 9.0, 9.0, 8.0, 8.0, 4.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {3.5, 8.0, 9.0, 9.0, 9.0, 9.0, 9.0, 8.0, 3.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {4.0, 8.0, 9.0, 9.0, 9.0, 9.0, 9.0, 8.0, 4.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {3.5, 9.0, 9.0, 9.0, 9.0, 9.0, 9.0, 9.0, 3.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {4.0, 9.0, 9.0, 9.0, 9.0, 9.0, 9.0, 9.0, 4.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {4.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 4.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {3.5, 8.0, 8.0, 8.0, 9.0, 9.0, 8.0, 8.0, 8.0, 3.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	    {4.0, 8.0, 8.0, 8.0, 9.0, 9.0, 8.0, 8.0, 8.0, 4.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	};
-
-	float t_hange_num_5[52] = {3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9};
-
-	float t_hange_dist_11[52][20] = {
-	    {1.0, 4.0, 3.5, 3.5, 3.5, 3.5, 4.0, 1.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 3.5, 4.0, 4.0, 3.5, 4.0, 1.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 1.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0},
-	    {1.0, 3.5, 3.5, 3.5, 4.0, 3.5, 3.5, 3.5, 1.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 3.5, 3.5, 4.0, 3.5, 3.5, 4.0, 1.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 3.5, 4.0, 3.5, 4.0, 4.0, 1.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 1.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 4.0, 1.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 3.5, 3.5, 4.0, 4.0, 3.5, 3.5, 4.0, 1.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 3.5, 4.0, 4.0, 3.5, 4.0, 4.0, 1.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 1.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 3.5, 3.5, 3.5, 4.0, 3.5, 3.5, 3.5, 4.0, 1.0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 3.5, 3.5, 4.0, 3.5, 3.5, 4.0, 4.0, 1.0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 3.5, 4.0, 4.0, 4.0, 3.5, 4.0, 4.0, 1.0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 1.0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 4.0, 4.0, 1.0, 0, 0, 0, 0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 3.5, 3.5, 4.0, 4.0, 3.5, 3.5, 4.0, 4.0, 1.0, 0, 0, 0, 0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 3.5, 4.0, 4.0, 4.0, 4.0, 3.5, 4.0, 4.0, 1.0, 0, 0, 0, 0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 1.0, 0, 0, 0, 0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 3.5, 3.5, 3.5, 4.0, 3.5, 3.5, 3.5, 4.0, 4.0, 1.0, 0, 0, 0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 3.5, 3.5, 4.0, 4.0, 4.0, 3.5, 3.5, 4.0, 4.0, 1.0, 0, 0, 0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 4.0, 4.0, 1.0, 0, 0, 0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 1.0, 0, 0, 0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 3.5, 3.5, 3.5, 4.0, 4.0, 3.5, 3.5, 3.5, 4.0, 4.0, 1.0, 0, 0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 4.0, 4.0, 1.0, 0, 0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 4.0, 4.0, 1.0, 0, 0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 1.0, 0, 0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 4.0, 3.5, 3.5, 3.5, 4.0, 3.5, 3.5, 3.5, 4.0, 4.0, 4.0, 1.0, 0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 4.0, 3.5, 3.5, 4.0, 4.0, 4.0, 3.5, 3.5, 4.0, 4.0, 4.0, 1.0, 0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 4.0, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 4.0, 4.0, 4.0, 1.0, 0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 1.0, 0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 4.0, 3.5, 3.5, 3.5, 4.0, 4.0, 3.5, 3.5, 3.5, 4.0, 4.0, 4.0, 1.0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 4.0, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 4.0, 4.0, 4.0, 1.0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 4.0, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 4.0, 4.0, 4.0, 1.0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 1.0, 0, 0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 4.0, 3.5, 3.5, 3.5, 4.0, 4.0, 4.0, 3.5, 3.5, 3.5, 4.0, 4.0, 4.0, 1.0, 0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 4.0, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 4.0, 4.0, 4.0, 1.0, 0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 4.0, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 4.0, 4.0, 4.0, 1.0, 0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 1.0, 0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 4.0, 3.5, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 3.5, 4.0, 4.0, 4.0, 1.0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 4.0, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 4.0, 4.0, 4.0, 1.0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 4.0, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 4.0, 4.0, 4.0, 1.0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 1.0, 0, 0.0},
-	    {1.0, 4.0, 4.0, 4.0, 3.5, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 3.5, 4.0, 4.0, 4.0, 1.0, 0.0},
-	    {1.0, 4.0, 4.0, 4.0, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 4.0, 4.0, 4.0, 1.0, 0.0},
-	    {1.0, 4.0, 4.0, 4.0, 3.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 4.0, 4.0, 4.0, 1.0, 0.0},
-	    {1.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 1.0, 0.0},
-	    {1.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 1.0, 0.0},
-	    {1.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 1.0, 0.0},
-	    {1.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 1.0, 0.0},
-	    {1.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 1.0, 0.0},
-	    {1.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 1.0, 0.0},
-	};
-
-	float t_hange_num_11[51] = {7,  7,  7,  8,  8,  8,  8,  9,  9,  9,  9,  10, 10, 10, 10, 11, 11, 11, 11, 12, 12, 12, 12, 13, 13, 13,
-	                            13, 14, 14, 14, 14, 15, 15, 15, 15, 16, 16, 16, 16, 17, 17, 17, 17, 18, 18, 18, 18, 18, 18, 18, 18};
-
-	explicit TTraction(scene::node_data const &Nodedata);
-
-	void Load(cParser *parser, glm::dvec3 const &pOrigin);
-	// set origin point
-	void origin(glm::dvec3 Origin)
-	{
-		m_origin = Origin;
-	}
-	// retrieves list of the track's end points
-	std::vector<glm::dvec3> endpoints() const;
-	// creates geometry data in specified geometry bank. returns: number of created elements, or NULL
-	// NOTE: deleting nodes doesn't currently release geometry data owned by the node. TODO: implement erasing individual geometry chunks and banks
-	std::size_t create_geometry(gfx::geometrybank_handle const &Bank);
-	int TestPoint(glm::dvec3 const &Point);
-	void Connect(int my, TTraction *with, int to);
-	void Init();
-	bool WhereIs();
-	void ResistanceCalc(int d = -1, double r = 0, TTractionPowerSource *ps = nullptr);
-	void PowerSet(TTractionPowerSource *ps);
-	double VoltageGet(double u, double i);
-	void Deserialize_type(cParser &Input);
-
-  private:
-	// methods
-	glm::vec3 wire_color() const;
-	// radius() subclass details, calculates node's bounding radius
-	float radius_();
-	// serialize() subclass details, sends content of the subclass to provided stream
-	void serialize_(std::ostream &Output) const;
-	// deserialize() subclass details, restores content of the subclass from provided stream
-	void deserialize_(std::istream &Input);
-	// export() subclass details, sends basic content of the class in legacy (text) format to provided stream
-	void export_as_text_(std::ostream &Output) const;
 };
 
-// collection of virtual tracks and roads present in the scene
-class traction_table : public basic_table<TTraction>
-{
 
-  public:
-	// legacy method, initializes traction after deserialization from scenario file
-	void InitTraction();
+
+// collection of virtual tracks and roads present in the scene
+class traction_table : public basic_table<TTraction> {
+
+public:
+    // legacy method, initializes traction after deserialization from scenario file
+    void
+        InitTraction();
 };
 
 //---------------------------------------------------------------------------
