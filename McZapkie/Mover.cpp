@@ -128,15 +128,13 @@ void TSecuritySystem::update(double dt, double vel, bool pwr, int cab) {
 		vigilance_timer = 0.0;
 		alert_timer = 0.0;
 		press_timer = 0.0;
-		if (!DebugModeFlag)
-			cabactive = 0;
 		return;
 	}
 	
-	bool is_powered = !power && pwr;
-	bool is_cabactived = CabDependent && (cabactive != cab);
+	bool just_powered_on = !power && pwr;
+	bool just_activated = CabDependent && (cabactive != cab);
 
-	if (cabsignal_enabled && (is_powered || is_cabactived)) {
+	if (!DebugModeFlag && cabsignal_enabled && (just_powered_on || just_activated)) {
 		cabsignal_active = true;
 		alert_timer = SoundSignalDelay;
 	}

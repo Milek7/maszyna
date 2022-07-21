@@ -351,7 +351,7 @@ global_settings::ConfigParse(cParser &Parser) {
             // clamp the light number
             // max 8 lights per opengl specs, minus one used for sun. at least one light for
             // controlled vehicle
-            DynamicLightCount = clamp(DynamicLightCount, 1, 7);
+            DynamicLightCount = clamp(DynamicLightCount, 0, 7);
         }
         else if (token == "scenario.time.override")
         {
@@ -997,6 +997,10 @@ global_settings::ConfigParse(cParser &Parser) {
     */
     if (iPause)
         iTextMode = GLFW_KEY_F1; // jak pauza, to pokazać zegar
+
+#ifndef WITH_PYTHON
+	python_enabled = false;
+#endif
 
 #ifdef _WIN32
 		    Console::ModeSet(iFeedbackMode, iFeedbackPort); // tryb pracy konsoli sterowniczej
