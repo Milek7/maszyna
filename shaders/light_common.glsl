@@ -154,7 +154,7 @@ vec3 apply_lights_emission(vec3 fragcolor, vec3 fragnormal, vec3 texturecolor, v
 	float shadow1 = 0.0;
 	if (shadowtone < 1.0)
 	{
-		shadow1 = (1 - shadowtone) * clamp(calc_shadow(), 0.0, 1.00);
+		shadow1 = (1.0 - shadowtone) * clamp(calc_shadow(), 0.0, 1.00);
 	}
 	fragcolor += lights[0].color * 5.0 * (1.0 - shadow1) * diffuseamount;
 	fragcolor = mix(fragcolor * 0.35, envcolor, reflectivity);
