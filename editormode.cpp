@@ -158,9 +158,8 @@ editor_mode::on_key( int const Key, int const Scancode, int const Action, int co
     Global.shiftState = ( Mods & GLFW_MOD_SHIFT ) ? true : false;
     Global.ctrlState = ( Mods & GLFW_MOD_CONTROL ) ? true : false;
     Global.altState = ( Mods & GLFW_MOD_ALT ) ? true : false;
-    Global.capsState = (Mods & GLFW_MOD_CAPS_LOCK) ? true : false;
 
-    bool anyModifier = Mods & (GLFW_MOD_SHIFT | GLFW_MOD_CONTROL | GLFW_MOD_ALT | GLFW_MOD_CAPS_LOCK);
+    bool anyModifier = Mods & (GLFW_MOD_SHIFT | GLFW_MOD_CONTROL | GLFW_MOD_ALT );
 
     // give the ui first shot at the input processing...
     if( !anyModifier && true == m_userinterface->on_key( Key, Action ) ) { return; }
