@@ -1,4 +1,4 @@
-﻿/*
+/*
 This Source Code Form is subject to the
 terms of the Mozilla Public License, v.
 2.0. If a copy of the MPL was not
@@ -1509,6 +1509,9 @@ debug_panel::render_section_settings() {
     ImGui::SliderFloat( ( to_string( static_cast<int>( Global.AudioVolume * 100 ) ) + "%###volumemain" ).c_str(), &Global.AudioVolume, 0.0f, 2.0f, "Main audio volume" );
     if( ImGui::SliderFloat( ( to_string( static_cast<int>( Global.VehicleVolume * 100 ) ) + "%###volumevehicle" ).c_str(), &Global.VehicleVolume, 0.0f, 1.0f, "Vehicle sounds" ) ) {
         audio::event_volume_change = true;
+    }
+    if( ImGui::SliderFloat( ( to_string( static_cast<int>( Global.RadioVolume * 100 ) ) + "%###volumeradio" ).c_str(), &Global.RadioVolume, 0.0f, 1.0f, "Radio volume" ) ) {
+      audio::event_volume_change = true;
     }
     if( ImGui::SliderFloat( ( to_string( static_cast<int>( Global.EnvironmentPositionalVolume * 100 ) ) + "%###volumepositional" ).c_str(), &Global.EnvironmentPositionalVolume, 0.0f, 1.0f, "Positional sounds" ) ) {
         audio::event_volume_change = true;
