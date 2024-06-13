@@ -599,7 +599,7 @@ void uart_input::poll()
 			//byte 21-22
 			SPLIT_INT16((time.wYear - 1) * 12 + time.wMonth - 1),
 			//byte 23-24
-			SPLIT_INT16((time.wDay - 1) * 1440 + time.wHour * 60 + time.wMinute),
+			SPLIT_INT16(time.wDay * 1440 + time.wHour * 60 + time.wMinute),
 			//byte 25-26
 			SPLIT_INT16(time.wSecond * 1000 + time.wMilliseconds),
 			//byte 27-30
