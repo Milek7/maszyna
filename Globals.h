@@ -326,6 +326,8 @@ struct global_settings {
     float m_skysaturationcorrection{ 1.65f };
     float m_skyhuecorrection{ 0.5f };
 
+    bool enable_utf8 = false;
+
 // methods
     void LoadIniFile( std::string asFileName );
     void ConfigParse( cParser &parser );

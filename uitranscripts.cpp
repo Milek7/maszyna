@@ -37,7 +37,7 @@ TTranscripts::Add( std::string const &txt, bool backgorund ) {
 
     if( true == txt.empty() ) { return; }
 
-    std::string asciitext{ txt }; win1250_to_ascii( asciitext ); // TODO: launch relevant conversion table based on language
+    std::string asciitext{ txt }; remove_accents( asciitext ); // TODO: launch relevant conversion table based on language
     cParser parser( asciitext );
     while( true == parser.getTokens( 3, false, "[]\n" ) ) {
 

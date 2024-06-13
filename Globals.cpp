@@ -670,7 +670,11 @@ global_settings::ConfigParse(cParser &Parser) {
             Parser.getTokens(1, false);
             Parser >> asLang;
         }
-		else if( token == "python.updatetime" )
+        else if (token == "utf8") {
+            Parser.getTokens();
+            Parser >> enable_utf8;
+        }
+        else if( token == "python.updatetime" )
         {
             Parser.getTokens();
             Parser >> PythonScreenUpdateRate;
@@ -1353,6 +1357,7 @@ global_settings::export_as_text( std::ostream &Output ) const {
     export_as_text( Output, "hiddenevents", iHiddenEvents );
     export_as_text( Output, "pause", ( iPause & 1 ) != 0 );
     export_as_text( Output, "lang", asLang );
+    export_as_text( Output, "utf8", enable_utf8 );
     export_as_text( Output, "python.updatetime", PythonScreenUpdateRate );
     Output
         << "uitextcolor "

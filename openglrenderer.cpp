@@ -4280,7 +4280,7 @@ opengl_renderer::Update( double const Deltatime ) {
     auto const glerror = ::glGetError();
     if( glerror != GL_NO_ERROR ) {
         std::string glerrorstring;
-        win1250_to_ascii( glerrorstring );
+        remove_accents( glerrorstring );
         Global.LastGLError = std::to_string( glerror ) + " (" + glerrorstring + ")";
     }
 }

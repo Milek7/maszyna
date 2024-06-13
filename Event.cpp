@@ -720,7 +720,7 @@ putvalues_event::deserialize_( cParser &Input, scene::scratch_data &Scratchpad )
         if( contains( token, '#' ) ) {
             token.erase( token.find( '#' ) ); // obcięcie unikatowości
         }
-        win1250_to_ascii( token ); // get rid of non-ascii chars
+        remove_accents( token ); // get rid of non-ascii chars
         m_input.command_type = TCommandType::cm_PassengerStopPoint;
         // nie do kolejki (dla SetVelocity też, ale jak jest do toru dowiązany)
         m_passive = true;

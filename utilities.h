@@ -35,6 +35,22 @@ http://mozilla.org/MPL/2.0/.
 
 #define MAKE_ID4(a,b,c,d) (((std::uint32_t)(d)<<24)|((std::uint32_t)(c)<<16)|((std::uint32_t)(b)<<8)|(std::uint32_t)(a))
 
+const std::unordered_map<char, char> CP1250_ACCENTS_MAP {
+    { 165, 'A' }, { 198, 'C' }, { 202, 'E' }, { 163, 'L' }, { 209, 'N' }, { 211, 'O' }, { 140, 'S' }, { 143, 'Z' }, { 175, 'Z' },
+    { 185, 'a' }, { 230, 'c' }, { 234, 'e' }, { 179, 'l' }, { 241, 'n' }, { 243, 'o' }, { 156, 's' }, { 159, 'z' }, { 191, 'z' }
+};
+
+const std::unordered_map<std::string, char> UTF8_ACCENTS_MAP {
+    { u8"Ą", 'A' }, { u8"Ć", 'C' }, { u8"Ę", 'E'}, { u8"Ł", 'L' }, { u8"Ń", 'N' }, { u8"Ó", 'O' }, { u8"Ś", 'S' }, { u8"Ź", 'Z' }, { u8"Ż", 'Z' },
+    { u8"ą", 'a' }, { u8"ć", 'c' }, { u8"ę", 'e' }, { u8"ł", 'l' }, { u8"ń", 'n' }, { u8"ó", 'o' }, { u8"ś", 's' }, { u8"ź", 'z' }, { u8"ż", 'z' }
+};
+
+const std::unordered_map<char, std::string> CP1250_TO_UTF8_MAP {
+    { 165, u8"Ą" }, { 198, u8"Ć" }, { 202, u8"Ę" }, { 163, u8"Ł" }, { 209, u8"Ń" }, { 211, u8"Ó" }, { 140, u8"Ś" }, { 143, u8"Ź" }, { 175, u8"Ż" },
+    { 185, u8"ą" }, { 230, u8"ć" }, { 234, u8"ę" }, { 179, u8"ł" }, { 241, u8"ń" }, { 243, u8"ó" }, { 156, u8"ś" }, { 159, u8"ź" }, { 191, u8"ż" }
+};
+
+
 extern bool DebugModeFlag;
 extern bool FreeFlyModeFlag;
 extern bool EditorModeFlag;
@@ -153,11 +169,11 @@ std::string ToLower(std::string const &text);
 std::string ToUpper(std::string const &text);
 
 // replaces polish letters with basic ascii
-void win1250_to_ascii( std::string &Input );
-// TODO: unify with win1250_to_ascii()
+void remove_accents( std::string &Input );
+// TODO: unify with remove_accents()
 std::string Bezogonkow( std::string Input, bool const Underscorestospaces = false );
 
-std::string win1250_to_utf8(const std::string &input);
+std::string to_utf8(const std::string &input);
 
 inline
 std::string

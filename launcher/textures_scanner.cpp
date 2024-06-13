@@ -159,13 +159,13 @@ std::shared_ptr<ui::skin_meta> ui::vehicles_bank::parse_meta(const std::string &
 	std::getline(stream, meta->texture_author, ',');
 	std::getline(stream, meta->photo_author, ',');
 
-	meta->name = win1250_to_utf8(meta->name);
-	meta->short_id = win1250_to_utf8(meta->short_id);
-	meta->location = win1250_to_utf8(meta->location);
-	meta->rev_date = win1250_to_utf8(meta->rev_date);
-	meta->rev_company = win1250_to_utf8(meta->rev_company);
-	meta->texture_author = win1250_to_utf8(meta->texture_author);
-	meta->photo_author = win1250_to_utf8(meta->photo_author);
+	meta->name = to_utf8(meta->name);
+	meta->short_id = to_utf8(meta->short_id);
+	meta->location = to_utf8(meta->location);
+	meta->rev_date = to_utf8(meta->rev_date);
+	meta->rev_company = to_utf8(meta->rev_company);
+	meta->texture_author = to_utf8(meta->texture_author);
+	meta->photo_author = to_utf8(meta->photo_author);
 
 	meta->search_lowered +=
 	        ToLower("n:" + meta->name + ":i:" + meta->short_id + ":d:" + meta->location +

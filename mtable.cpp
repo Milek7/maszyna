@@ -351,7 +351,7 @@ bool TTrainParameters::LoadTTfile(std::string scnpath, int iPlus, double vmax)
                     } // while (!(() || fin.eof()));
                     if( s != "|" ) {
                         Relation1 = s;
-                        win1250_to_ascii( Relation1 );
+                        remove_accents( Relation1 );
                     }
                     else
                         ConversionError = -5;
@@ -367,7 +367,7 @@ bool TTrainParameters::LoadTTfile(std::string scnpath, int iPlus, double vmax)
                             break;
                     } // while (!( || (fin.eof())));
                     fin >> Relation2;
-                    win1250_to_ascii( Relation2 );
+                    remove_accents( Relation2 );
                     while (fin >> s || !fin.bad())
                     {
                         if (s == "Wymagany")
@@ -427,7 +427,7 @@ bool TTrainParameters::LoadTTfile(std::string scnpath, int iPlus, double vmax)
                                 fin >> s;
                             fin >> record->StationName;
                             // get rid of non-ascii chars. TODO: run correct version based on locale
-                            win1250_to_ascii( record->StationName ); 
+                            remove_accents( record->StationName ); 
                             do
                             {
                                 fin >> s;

@@ -188,7 +188,7 @@ state_serializer::deserialize_assignment( cParser &Input, scene::scratch_data &S
         && ( token != "endassignment" ) ) {
         // assignment is expected to come as string pairs: language id and the actual assignment enclosed in quotes to form a single token
         auto assignment{ Input.getToken<std::string>() };
-        win1250_to_ascii( assignment );
+        remove_accents( assignment );
         Scratchpad.trainset.assignment.emplace( token, assignment );
         token = Input.getToken<std::string>();
     }
