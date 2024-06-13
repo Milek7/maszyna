@@ -4196,28 +4196,15 @@ opengl_renderer::Update( double const Deltatime ) {
 */
     m_updateaccumulator += Deltatime;
 
-    if( ( true  == Global.ControlPicking )
-     && ( false == FreeFlyModeFlag ) ) {
-        if( ( false == m_control_pick_requests.empty() )
-         || ( m_updateaccumulator >= 1.0 ) ) {
-            Update_Pick_Control();
-        }
-    }
-    else {
-        m_pickcontrolitem = nullptr;
+    if( ( true  == Global.ControlPicking ) && ( false == FreeFlyModeFlag ) ) {
+        Update_Pick_Control();
     }
     // temporary conditions for testing. eventually will be coupled with editor mode
     if( ( true == Global.ControlPicking )
      && ( true == FreeFlyModeFlag )
      && ( ( true == DebugModeFlag )
        || ( true == EditorModeFlag ) ) ) {
-        if( ( false == m_node_pick_requests.empty() )
-         || ( m_updateaccumulator >= 1.0 ) ) {
-            Update_Pick_Node();
-        }
-    }
-    else {
-        m_picksceneryitem = nullptr;
+        Update_Pick_Node();
     }
 
     if( m_updateaccumulator < 1.0 ) {

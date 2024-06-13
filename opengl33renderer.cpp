@@ -4439,6 +4439,12 @@ void opengl33_renderer::Update(double const Deltatime)
 	Update_Pick_Control();
 	Update_Pick_Node();
 
+	if ((true == Global.ControlPicking) && (false == FreeFlyModeFlag))
+        Pick_Control_Callback([](const TSubModel *, const glm::vec2) {});
+	// temporary conditions for testing. eventually will be coupled with editor mode
+	if ((true == Global.ControlPicking) && (true == DebugModeFlag) && (true == FreeFlyModeFlag))
+        Pick_Node_Callback([](scene::basic_node *) {});
+
 	m_updateaccumulator += Deltatime;
 
 	if (m_updateaccumulator < 1.0)
@@ -4491,12 +4497,6 @@ void opengl33_renderer::Update(double const Deltatime)
 		m_geometry.update();
 		m_textures.update();
 	}
-
-	if ((true == Global.ControlPicking) && (false == FreeFlyModeFlag))
-        Pick_Control_Callback([](const TSubModel *, const glm::vec2) {});
-	// temporary conditions for testing. eventually will be coupled with editor mode
-	if ((true == Global.ControlPicking) && (true == DebugModeFlag) && (true == FreeFlyModeFlag))
-        Pick_Node_Callback([](scene::basic_node *) {});
 
 	// dump last opengl error, if any
     int glerror;
